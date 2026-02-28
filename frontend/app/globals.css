@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* ─── TDS 토큰 (토스 디자인 시스템 컬러 기반) ──────────────────────────────── */
+:root {
+  --tds-blue: #3182F6;
+  --tds-text-primary: #191F28;
+  --tds-text-secondary: #4E5968;
+  --tds-text-tertiary: #8B95A1;
+  --tds-text-disabled: #B0B8C1;
+  --tds-bg-base: #FFFFFF;
+  --tds-bg-secondary: #F9FAFB;
+  --tds-bg-tertiary: #F2F4F6;
+  --tds-border: #E5E8EB;
+
+  /* next/font 변수 */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ─── 토스 미니앱: 다크모드 강제 비활성화 (TDS는 라이트 테마 단일) ─────────── */
+/* @media (prefers-color-scheme: dark) 블록 제거 — 앱인토스는 항상 라이트 */
+
+/* ─── base 스타일 ─────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* 모바일 터치 하이라이트 제거 */
+}
+
+html {
+  /* iOS Safari 바운스 스크롤 방지 */
+  overscroll-behavior: none;
+}
+
+body {
+  background-color: var(--tds-bg-base);
+  color: var(--tds-text-primary);
+  /* Geist Sans 우선, 없으면 시스템 산세리프 */
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── 스크롤바 숨김 (모바일 네이티브 앱 경험) ──────────────────────────────── */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
