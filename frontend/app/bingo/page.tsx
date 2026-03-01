@@ -93,6 +93,7 @@ export default function BingoPage() {
     cellStates[combo[0]] && cellStates[combo[1]] && cellStates[combo[2]]
   );
   const lines = achievedCombos.length;
+  const winningCellIndices = new Set(achievedCombos.flat());
 
   const prevLinesRef = useRef(0);
   const resultCardRef = useRef<HTMLDivElement>(null);
@@ -291,60 +292,37 @@ export default function BingoPage() {
 
           <div className="relative mb-8">
             <div className="grid grid-cols-3 gap-3 relative z-10">
-              {dailyMissions.map((mission, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => toggleCell(idx)}
-                  className={`
+              {dailyMissions.map((mission, idx) => {
+                const isWinning = winningCellIndices.has(idx);
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => toggleCell(idx)}
+                    className={`
                     relative flex flex-col items-center justify-center p-2 text-center
-                    rounded-2xl aspect-square shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer break-keep
-                    transition-all duration-200 select-none
-                    ${cellStates[idx] ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6]' : 'bg-white text-[#191F28] border-2 border-transparent'}
+                    rounded-2xl aspect-square cursor-pointer break-keep
+                    transition-all duration-300 select-none
+                    ${isWinning
+                        ? 'bg-[#F0F6FF] text-[#3182F6] border-2 border-[#3182F6] shadow-[0_4px_16px_rgba(49,130,246,0.3)] animate-winner-pulse z-10'
+                        : cellStates[idx]
+                          ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+                          : 'bg-white text-[#191F28] border-2 border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)]'}
                     active:scale-95
                   `}
-                >
-                  <span className="text-2xl mb-1">{mission.icon}</span>
-                  <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
+                  >
+                    <span className="text-2xl mb-1">{mission.icon}</span>
+                    <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
 
-                  {/* Stamp logic */}
-                  {cellStates[idx] && (
-                    <div className="absolute inset-0 flex items-center justify-center animate-bounce-stamp pointer-events-none">
-                      <div className="w-[85%] h-[85%] rounded-[20px] border-[5px] border-[#3182F6] shadow-[0_0_15px_rgba(49,130,246,0.4)] opacity-80 mix-blend-multiply"></div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {/* Stamp logic */}
+                    {cellStates[idx] && (
+                      <div className="absolute inset-0 flex items-center justify-center animate-bounce-stamp pointer-events-none">
+                        <div className={`w-[85%] h-[85%] rounded-[20px] border-[5px] ${isWinning ? 'border-[#3182F6] shadow-[0_0_20px_rgba(49,130,246,0.6)]' : 'border-[#3182F6] shadow-[0_0_15px_rgba(49,130,246,0.4)]'} opacity-80 mix-blend-multiply transition-all duration-300`}></div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-
-            {/* Winning Lines Overlay Effect */}
-            {achievedCombos.map((combo, i) => {
-              const isRow1 = combo[0] === 0 && combo[1] === 1;
-              const isRow2 = combo[0] === 3 && combo[1] === 4;
-              const isRow3 = combo[0] === 6 && combo[1] === 7;
-              const isCol1 = combo[0] === 0 && combo[1] === 3;
-              const isCol2 = combo[0] === 1 && combo[1] === 4;
-              const isCol3 = combo[0] === 2 && combo[1] === 5;
-              const isDiag1 = combo[0] === 0 && combo[1] === 4;
-              const isDiag2 = combo[0] === 2 && combo[1] === 4;
-
-              let style: React.CSSProperties = {};
-              if (isRow1) style = { top: '16.66%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
-              if (isRow2) style = { top: '50%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
-              if (isRow3) style = { top: '83.33%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
-              if (isCol1) style = { left: '16.66%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
-              if (isCol2) style = { left: '50%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
-              if (isCol3) style = { left: '83.33%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
-              if (isDiag1) style = { top: '50%', left: '50%', width: '115%', height: '10px', transform: 'translate(-50%, -50%) rotate(45deg)' };
-              if (isDiag2) style = { top: '50%', left: '50%', width: '115%', height: '10px', transform: 'translate(-50%, -50%) rotate(-45deg)' };
-
-              return (
-                <div
-                  key={i}
-                  className="absolute bg-gradient-to-r from-[#3182F6] via-[#6B5CE7] to-[#3182F6] bg-[length:200%_auto] rounded-full z-20 pointer-events-none shadow-[0_4px_16px_rgba(107,92,231,0.4)] opacity-90 animate-in zoom-in fade-in duration-300"
-                  style={style}
-                />
-              );
-            })}
           </div>
 
           <div className="mt-auto pb-6 flex flex-col gap-3">
@@ -448,13 +426,16 @@ export default function BingoPage() {
 
             <div className="bg-[#F2F4F6] p-4 rounded-2xl w-[220px] shadow-inner z-10 border border-gray-100">
               <div className="grid grid-cols-3 gap-2">
-                {cellStates.map((state, idx) => (
-                  <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${state ? 'bg-[#E8F3FF] border border-[#3182F6]' : 'bg-white'}`}>
-                    {state && (
-                      <div className="w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] opacity-70"></div>
-                    )}
-                  </div>
-                ))}
+                {cellStates.map((state, idx) => {
+                  const isWinning = winningCellIndices.has(idx);
+                  return (
+                    <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${isWinning ? 'bg-[#F0F6FF] border border-[#3182F6]' : state ? 'bg-[#E8F3FF] border border-[#3182F6]/50' : 'bg-white'}`}>
+                      {state && (
+                        <div className={`w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] ${isWinning ? 'opacity-100' : 'opacity-60'}`}></div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -502,6 +483,14 @@ export default function BingoPage() {
         }
         .animate-bounce-icon {
           animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes winnerPulse {
+          0% { transform: scale(1); box-shadow: 0 4px 16px rgba(49,130,246,0.3); }
+          50% { transform: scale(1.05); box-shadow: 0 8px 24px rgba(49,130,246,0.6); }
+          100% { transform: scale(1); box-shadow: 0 4px 16px rgba(49,130,246,0.3); }
+        }
+        .animate-winner-pulse {
+          animation: winnerPulse 1.5s ease-in-out infinite;
         }
       `}} />
     </div>
