@@ -308,7 +308,9 @@ export default function BingoPage() {
 
                   {/* Stamp logic */}
                   {cellStates[idx] && (
-                    <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">⭕</div>
+                    <div className="absolute inset-0 flex items-center justify-center animate-bounce-stamp pointer-events-none">
+                      <div className="w-[85%] h-[85%] rounded-[20px] border-[5px] border-[#3182F6] shadow-[0_0_15px_rgba(49,130,246,0.4)] opacity-80 mix-blend-multiply"></div>
+                    </div>
                   )}
                 </div>
               ))}
@@ -338,7 +340,7 @@ export default function BingoPage() {
               return (
                 <div
                   key={i}
-                  className="absolute bg-[#F04452]/90 rounded-full z-20 pointer-events-none shadow-[0_2px_8px_rgba(240,68,82,0.5)] animate-in zoom-in fade-in duration-300"
+                  className="absolute bg-gradient-to-r from-[#3182F6] via-[#6B5CE7] to-[#3182F6] bg-[length:200%_auto] rounded-full z-20 pointer-events-none shadow-[0_4px_16px_rgba(107,92,231,0.4)] opacity-90 animate-in zoom-in fade-in duration-300"
                   style={style}
                 />
               );
@@ -448,7 +450,9 @@ export default function BingoPage() {
               <div className="grid grid-cols-3 gap-2">
                 {cellStates.map((state, idx) => (
                   <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${state ? 'bg-[#E8F3FF] border border-[#3182F6]' : 'bg-white'}`}>
-                    {state && <span className="text-2xl">⭕</span>}
+                    {state && (
+                      <div className="w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] opacity-70"></div>
+                    )}
                   </div>
                 ))}
               </div>
