@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>오늘의 갓생 생존 빙고</title>
+    <!-- App-in-Toss SDK -->
+    <script src="https://assets.toss.im/app-in-toss/sdk.js"></script>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v3.2.1/dist/web/variable/pretendardvariable.css" />
+    <style>
+        :root {
+            --toss-blue: #3182F6;
+            --toss-blue-active: #1b64da;
+            --toss-bg: #F2F4F6;
+            --toss-card: #FFFFFF;
+            --toss-text-primary: #191F28;
+            --toss-text-secondary: #8B95A1;
+            --toss-border: #E5E8EB;
+            --toss-disabled: #E5E8EB;
+            --toss-disabled-text: #B0B8C1;
+            --kakao-yellow: #FEE500;
+            --kakao-text: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--toss-bg);
+            color: var(--toss-text-primary);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            /* Mobile viewport limit */
+            background-color: var(--toss-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            padding: 24px 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--toss-text-primary);
+        }
+
+        p.subtitle {
+            font-size: 15px;
+            color: var(--toss-text-secondary);
+            margin-bottom: 32px;
+        }
+
+        /* Bingo Board */
+        .bingo-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .bingo-cell {
+            background-color: var(--toss-card);
+            border-radius: 16px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--toss-text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: transform 0.1s ease, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+            word-break: keep-all;
+        }
+
+        .bingo-cell:active {
+            transform: scale(0.95);
+        }
+
+        .bingo-cell.marked {
+            background-color: #E8F3FF;
+            color: var(--toss-blue);
+            border: 2px solid var(--toss-blue);
+            padding: 10px;
+            /* Adjust for border */
+        }
+
+        .stamp {
+            position: absolute;
+            font-size: 36px;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        .bingo-cell.marked .stamp {
+            animation: stampAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes stampAnim {
+            0% {
+                opacity: 0;
+                transform: scale(3) rotate(-15deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(0.9) rotate(5deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* Buttons */
+        .btn-container {
+            margin-top: auto;
+            padding-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn_bottom {
+            margin-top: auto;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--toss-blue);
+            color: white;
+        }
+
+        .btn-primary:active {
+            background-color: var(--toss-blue-active);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--toss-disabled);
+            color: var(--toss-disabled-text);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-kakao {
+            background-color: var(--kakao-yellow);
+            color: var(--kakao-text);
+        }
+
+        .btn-secondary {
+            background-color: var(--toss-card);
+            color: var(--toss-text-primary);
+        }
+
+        /* Ads */
+        .ad-banner-bottom {
+            width: 100%;
+            height: 60px;
+            background-color: #E5E8EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--toss-text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 16px;
+            margin-top: 16px;
+        }
+
+        .ad-banner-interstitial {
+            width: 100%;
+            height: 250px;
+            background-color: #E5E8EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--toss-text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Loading */
+        .loading-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--toss-border);
+            border-top: 4px solid var(--toss-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--toss-text-primary);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Result Screen */
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 32px;
+            margin-bottom: 32px;
+        }
+
+        .result-board-wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .result-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 220px;
+        }
+
+        .result-cell {
+            background-color: var(--toss-bg);
+            border-radius: 8px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: transparent;
+            /* hide text */
+            position: relative;
+        }
+
+        .result-cell.marked {
+            background-color: #E8F3FF;
+            border: 1px solid var(--toss-blue);
+        }
+
+        .result-cell.marked::after {
+            content: '💮';
+            font-size: 24px;
+            color: initial;
+        }
+
+        /* Photocard / Reward UI */
+        .result-photocard {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 24px;
+            padding: 32px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            /* 인스타 스토리 비율감당용 */
+        }
+
+        .badge-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .result-desc {
+            font-size: 14px;
+            color: var(--toss-text-secondary);
+            margin-top: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- 1. 메인 화면 -->
+        <div id="page-main" class="page active">
+            <h1>오늘의 갓생 생존 빙고 🔥</h1>
+            <p class="subtitle">소소한 미션으로 하루를 채워보세요</p>
+
+            <div class="bingo-board" id="bingo-board">
+                <!-- JS로 생성됨 -->
+            </div>
+
+            <div class="btn-container btn_bottom">
+                <button id="btn-check-result" class="btn-primary" disabled>빙고 결과 확인하기</button>
+
+                <!-- [광고 수익화 - 하단 배너] -->
+                <!-- Type A: 퍼즐/유틸리티 앱 초기 진입 시 하단 배너 고정 노출 -->
+                <div class="ad-banner-bottom" id="bottom-ad-container">
+                    <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px"
+                        data-ad-client="ca-pub-XXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"></ins>
+                    <div style="display:none;">(AOS/iOS 배너 광고 ID 주입 위치)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 로딩 화면 (전면 광고) -->
+        <div id="page-loading" class="page">
+            <!-- [광고 수익화 - 전면 광고] -->
+            <!-- Type A: 결과 확인 전 강제 3초 체류 시 전면/네이티브 배너 노출 -->
+            <div class="ad-banner-interstitial" id="interstitial-ad-container">
+                <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
+                    data-ad-client="ca-pub-XXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"></ins>
+                <div style="display:none;">(AOS/iOS 전면 광고 ID 주입 위치)</div>
+            </div>
+
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p class="loading-text">빙고 결과를<br>분석 중입니다...</p>
+            </div>
+        </div>
+
+        <!-- 3. 결과/공유 화면 -->
+        <div id="page-result" class="page">
+            <div class="result-photocard">
+                <div class="badge-icon" id="result-badge">🌱</div>
+                <h1 id="result-title" style="text-align: center;">오늘도 갓생 완료! 🎉</h1>
+                <p id="result-desc" class="result-desc">소소한 시작이 완벽한 하루를 만듭니다.</p>
+
+                <div class="result-container">
+                    <div class="result-board-wrapper">
+                        <div class="result-board" id="result-board">
+                            <!-- JS로 미니 빙고판 렌더링 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container btn_bottom">
+                <button id="btn-share" class="btn-kakao">카카오톡으로 친구에게 자랑하기</button>
+                <button id="btn-retry" class="btn-secondary">내일 또 하러 오기</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const missions = [
+            "물 3잔 마시기", "10분 걷기", "텀블러 쓰기",
+            "스트레칭 하기", "커피값 아끼기", "칭찬 한마디",
+            "하늘 쳐다보기", "간식 참기", "정시 퇴근기원" // 띄어쓰기 조절
+        ];
+        let cellStates = new Array(9).fill(false);
+
+        const pages = {
+            main: document.getElementById('page-main'),
+            loading: document.getElementById('page-loading'),
+            result: document.getElementById('page-result')
+        };
+
+        const bingoBoard = document.getElementById('bingo-board');
+        const resultBoard = document.getElementById('result-board');
+        const btnCheckResult = document.getElementById('btn-check-result');
+        const resultTitle = document.getElementById('result-title');
+
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
+            [0, 4, 8], [2, 4, 6]             // diagonals
+        ];
+
+        function initBingo() {
+            bingoBoard.innerHTML = '';
+            cellStates.fill(false);
+            updateCheckButton();
+
+            missions.forEach((mission, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+
+                const textSpan = document.createElement('span');
+                textSpan.innerHTML = mission.replace(' ', '<br>');
+
+                const stamp = document.createElement('div');
+                stamp.className = 'stamp';
+                stamp.textContent = '💮';
+
+                cell.appendChild(textSpan);
+                cell.appendChild(stamp);
+
+                cell.addEventListener('click', () => toggleCell(index, cell));
+                bingoBoard.appendChild(cell);
+            });
+        }
+
+        function toggleCell(index, cellElement) {
+            cellStates[index] = !cellStates[index];
+
+            if (cellStates[index]) {
+                cellElement.classList.add('marked');
+                if (window.navigator.vibrate) window.navigator.vibrate(50);
+            } else {
+                cellElement.classList.remove('marked');
+            }
+
+            updateCheckButton();
+        }
+
+        function calculateBingoLines() {
+            let lines = 0;
+            winningCombinations.forEach(combo => {
+                if (cellStates[combo[0]] && cellStates[combo[1]] && cellStates[combo[2]]) {
+                    lines++;
+                }
+            });
+            return lines;
+        }
+
+        function updateCheckButton() {
+            const lines = calculateBingoLines();
+            if (lines > 0) {
+                btnCheckResult.disabled = false;
+            } else {
+                btnCheckResult.disabled = true;
+            }
+        }
+
+        function goPage(pageId) {
+            Object.values(pages).forEach(p => p.classList.remove('active'));
+            pages[pageId].classList.add('active');
+        }
+
+        function showLoading() {
+            goPage('loading');
+            // 정확히 3초 대기
+            setTimeout(() => {
+                showResult();
+            }, 3000);
+        }
+
+        function showResult() {
+            const lines = calculateBingoLines();
+
+            // 보상 티어 로직 (1번: 명예/시각적 수집 욕구 자극)
+            let badge = "🌱";
+            let title = "";
+            let desc = "";
+
+            if (lines >= 5) {
+                badge = "👑";
+                title = "루틴 마스터";
+                desc = "당신의 갓생력은 상위 1% 타노스급입니다!";
+            } else if (lines >= 3) {
+                badge = "🔥";
+                title = "열정 만수르";
+                desc = "이 기세라면 올해 목표 달성은 시간문제!";
+            } else if (lines >= 1) {
+                badge = "🐣";
+                title = "새내기 갓생러";
+                desc = "천리길도 한 걸음부터! 아주 훌륭한 시작이에요.";
+            }
+
+            document.getElementById('result-badge').textContent = badge;
+            resultTitle.innerHTML = `<span style="color:var(--toss-blue); font-size:16px;">${lines}줄 빙고 완성</span><br>${title} 🎉`;
+            document.getElementById('result-desc').textContent = desc;
+
+            // Draw mini board
+            resultBoard.innerHTML = '';
+            cellStates.forEach((state) => {
+                const cell = document.createElement('div');
+                cell.className = 'result-cell';
+                if (state) cell.classList.add('marked');
+                resultBoard.appendChild(cell);
+            });
+
+            goPage('result');
+        }
+
+        function resetApp() {
+            initBingo();
+            goPage('main');
+        }
+
+        // [바이럴 기능 1] 토스 기능성 푸시 알림 트리거 (mTLS 백엔드 호출)
+        async function triggerTossPushNotification() {
+            try {
+                // 주의: 토스 내부 API는 백엔드(api.toss.im)에서 mTLS 인증서(tossApiClient)를 통해 전송해야 함
+                // 프론트엔드에서는 백엔드 라우터로 요청만 보냄
+                const response = await fetch('/api/push/trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: "오늘의 갓생 생존 빙고",
+                        message: "내일도 도장 찍으러 오세요! 🏃‍♀️🏃‍♂️"
+                    })
+                });
+                if (response.ok) {
+                    console.log("푸시 알림이 예약되었습니다.");
+                }
+            } catch (error) {
+                console.error("푸시 알림 예약 실패:", error);
+            }
+        }
+
+        // Event Listeners
+        btnCheckResult.addEventListener('click', () => {
+            showLoading();
+            // 결과 확인 시 리텐션을 위해 내일자 푸시 알림 예약 로직 트리거
+            triggerTossPushNotification();
+        });
+
+        document.getElementById('btn-retry').addEventListener('click', resetApp);
+
+        // [바이럴 기능 2] 카카오톡 공유
+        document.getElementById('btn-share').addEventListener('click', () => {
+            // 실제 연동 시: Kakao.Share.sendDefault(...) 사용
+            if (window.Kakao && window.Kakao.isInitialized()) {
+                // 카카오 SDK 로직 자리
+                alert('카카오톡 공유 API가 호출됩니다. [바이럴 설정 완료]');
+            } else {
+                alert('갓생 빙고 결과를 공유합니다! 🎯\n(실제 배포 오픈 시 카카오 템플릿 연동)');
+            }
+        });
+
+        // Mock AdSense Tag Injection (for visual placeholder only)
+        function initMockAds() {
+            const adScripts = document.querySelectorAll('.adsbygoogle');
+            adScripts.forEach(ad => {
+                ad.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#E5E8EB;color:#8B95A1;font-size:13px;border-radius:16px;">(Ad Instance)</div>`;
+            });
+        }
+
+        // Initialize
+        initBingo();
+        initMockAds();
+    </script>
+</body>
+
+</html>

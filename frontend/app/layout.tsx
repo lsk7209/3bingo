@@ -15,8 +15,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "토스 미니앱 퍼즐",
-  description: "토스 앱인토스 전용 퍼즐 미니앱",
+  title: "오늘의 갓생 생존 빙고 🔥",
+  description: "내 갓생력은 과연? 매일매일 새로운 빙고 미션으로 갓생에 도전해보세요!",
+  openGraph: {
+    title: "오늘의 갓생 생존 빙고 🔥",
+    description: "내 갓생력은 과연? 매일매일 새로운 빙고 미션으로 갓생에 도전해보세요!",
+    siteName: "갓생 빙고",
+    locale: "ko_KR",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png", // 실제 배포 시 public 폴더 내 이미지 필요
+        width: 1200,
+        height: 630,
+        alt: "갓생 생존 빙고 썸네일",
+      }
+    ]
+  },
 };
 
 export const viewport: Viewport = {

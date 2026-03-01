@@ -27,6 +27,11 @@ export default function Home() {
           로그인하여 시작하기
         </h3>
         <TossLoginButton />
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <a href="/bingo" className="block w-full py-4 text-center rounded-xl font-semibold bg-[#F2F4F6] text-[#191F28] hover:bg-[#E5E8EB] transition-colors">
+            갓생 빙고 미니앱 (BETA) 입장
+          </a>
+        </div>
       </div>
 
     </div>

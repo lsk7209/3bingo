@@ -1,0 +1,421 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import confetti from 'canvas-confetti';
+import { toCanvas } from 'html-to-image';
+
+const missionPool = [
+  { icon: "💧", text: "물 3잔 마시기" },
+  { icon: "🚶", text: "10분 걷기" },
+  { icon: "🥤", text: "텀블러 쓰기" },
+  { icon: "🧘‍♀️", text: "스트레칭 하기" },
+  { icon: "💰", text: "무지출 챌린지" },
+  { icon: "💬", text: "칭찬 한마디" },
+  { icon: "☁️", text: "하늘 쳐다보기" },
+  { icon: "🍩", text: "야식 참기" },
+  { icon: "🏃‍♂️", text: "계단 이용하기" },
+  { icon: "📚", text: "책 10페이지 읽기" },
+  { icon: "🍎", text: "건강한 간식 먹기" },
+  { icon: "🛌", text: "일찍 잠자리에 들기" },
+  { icon: "🧼", text: "10분 청소하기" },
+  { icon: "📝", text: "감사일기 쓰기" },
+  { icon: "🌞", text: "아침 기지개 켜기" },
+  { icon: "📵", text: "디지털 디톡스 30분" },
+  { icon: "💪", text: "스쿼트 30개 하기" },
+  { icon: "🥦", text: "채소 챙겨먹기" },
+  { icon: "🎵", text: "명상 음악 듣기" },
+  { icon: "🌱", text: "식물/반려동물 돌보기" }
+];
+
+const winningCombinations = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8],
+  [0, 3, 6], [1, 4, 7], [2, 5, 8],
+  [0, 4, 8], [2, 4, 6]
+];
+
+export default function BingoPage() {
+  const router = useRouter();
+  const [dailyMissions, setDailyMissions] = useState<{ icon: string, text: string }[]>([]);
+  const [cellStates, setCellStates] = useState<boolean[]>(new Array(9).fill(false));
+  const [pageState, setPageState] = useState<'main' | 'loading' | 'result' | 'loading_ad'>('main');
+  const [isSharing, setIsSharing] = useState(false);
+  const [chanceUsed, setChanceUsed] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toLocaleDateString();
+    const savedDataStr = localStorage.getItem('bingoState');
+    let initialized = false;
+
+    if (savedDataStr) {
+      try {
+        const savedData = JSON.parse(savedDataStr);
+        if (savedData.date === today && savedData.states && savedData.missions) {
+          setDailyMissions(savedData.missions);
+          setCellStates(savedData.states);
+          setChanceUsed(savedData.chanceUsed || false);
+          initialized = true;
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    if (!initialized) {
+      // Pick 9 random missions and shuffle their positions
+      const shuffledPool = [...missionPool].sort(() => 0.5 - Math.random());
+      const selectedMissions = shuffledPool.slice(0, 9);
+      // Final shuffle to ensure positions are also random within the 3x3 grid
+      const finalMissions = [...selectedMissions].sort(() => 0.5 - Math.random());
+
+      setDailyMissions(finalMissions);
+      setCellStates(new Array(9).fill(false));
+      setChanceUsed(false);
+
+      localStorage.setItem('bingoState', JSON.stringify({
+        date: today,
+        missions: finalMissions,
+        states: new Array(9).fill(false),
+        chanceUsed: false
+      }));
+    }
+  }, []);
+  const [friends, setFriends] = useState([
+    { id: 'user_1', name: '김토스', lines: 3, poked: false },
+    { id: 'user_2', name: '이뱅크', lines: 2, poked: false },
+    { id: 'user_3', name: '박테크', lines: 0, poked: false },
+  ]);
+
+  const lines = winningCombinations.filter(combo =>
+    cellStates[combo[0]] && cellStates[combo[1]] && cellStates[combo[2]]
+  ).length;
+
+  const prevLinesRef = useRef(0);
+  const resultCardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (lines > prevLinesRef.current) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        zIndex: 100
+      });
+    }
+    prevLinesRef.current = lines;
+  }, [lines]);
+
+  const toggleCell = (index: number) => {
+    setCellStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = !newStates[index];
+
+      if (newStates[index] && typeof window !== 'undefined' && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+
+      const today = new Date().toLocaleDateString();
+      localStorage.setItem('bingoState', JSON.stringify({
+        date: today,
+        missions: dailyMissions,
+        states: newStates,
+        chanceUsed: chanceUsed
+      }));
+
+      return newStates;
+    });
+  };
+
+  const handleChance = () => {
+    if (chanceUsed) return;
+    setPageState('loading_ad');
+
+    // 모의 보상 획득 대기 (2초)
+    setTimeout(() => {
+      const uncompletedIndices = cellStates.map((s, i) => s ? null : i).filter(i => i !== null);
+      if (uncompletedIndices.length > 0) {
+        // 남은 빈 칸 중 무작위 1개 선택
+        const randomIndex = uncompletedIndices[Math.floor(Math.random() * uncompletedIndices.length)];
+
+        setCellStates(prev => {
+          const newStates = [...prev];
+          newStates[randomIndex!] = true;
+
+          if (typeof window !== 'undefined' && window.navigator.vibrate) {
+            window.navigator.vibrate([30, 50, 30]); // 보상 획득 진동 패턴
+          }
+
+          const today = new Date().toLocaleDateString();
+          localStorage.setItem('bingoState', JSON.stringify({
+            date: today,
+            missions: dailyMissions,
+            states: newStates,
+            chanceUsed: true
+          }));
+
+          return newStates;
+        });
+        setChanceUsed(true);
+      }
+      setPageState('main');
+    }, 2000);
+  };
+
+  const handlePoke = async (id: string, name: string) => {
+    // Optimistic UI update
+    setFriends(prev => prev.map(f => f.id === id ? { ...f, poked: true } : f));
+
+    // Call the mTLS push trigger API
+    try {
+      await fetch('/api/push/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUserId: id,
+          title: "갓생 빙고 알림",
+          content: `친구가 당신을 콕 찔렀어요! 지금 빙고를 확인해보세요.`
+        })
+      });
+    } catch (err) {
+      console.error("Push reservation failed:", err);
+    }
+  };
+
+  const handleCheckResult = () => {
+    setPageState('loading');
+
+    // Trigger Push Notification (mTLS Backend)
+    fetch('/api/push/trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: "오늘의 갓생 생존 빙고",
+        message: "내일도 도장 찍으러 오세요! 🏃‍♀️🏃‍♂️"
+      })
+    }).catch(err => console.error("Push reservation failed:", err));
+
+    setTimeout(() => {
+      setPageState('result');
+    }, 3000);
+  };
+
+  const getRewardProps = (lines: number) => {
+    if (lines >= 5) return { badge: "👑", title: "루틴 마스터", desc: "당신의 갓생력은 상위 1% 타노스급입니다!" };
+    if (lines >= 3) return { badge: "🔥", title: "열정 만수르", desc: "이 기세라면 올해 목표 달성은 시간문제!" };
+    if (lines >= 1) return { badge: "🐣", title: "새내기 갓생러", desc: "천리길도 한 걸음부터! 아주 훌륭한 시작이에요." };
+    return { badge: "🌱", title: "도전 시작", desc: "소소한 시작이 완벽한 하루를 만듭니다." };
+  };
+
+  const handleCaptureAndShare = async () => {
+    if (!resultCardRef.current || isSharing) return;
+    setIsSharing(true);
+    try {
+      const canvas = await toCanvas(resultCardRef.current, { cacheBust: true, backgroundColor: '#ffffff' });
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setIsSharing(false);
+          return;
+        }
+        const file = new File([blob], 'godsaeng_bingo.png', { type: 'image/png' });
+
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: '오늘의 갓생 생존 빙고',
+              text: '내 갓생력은 과연? 빙고 결과를 확인해보세요! 🔥',
+              files: [file]
+            });
+          } catch (error) {
+            console.error('Share failed', error);
+          }
+        } else {
+          // Fallback download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'godsaeng_bingo.png';
+          a.click();
+        }
+        setIsSharing(false);
+      });
+    } catch (err) {
+      console.error('Capture failed', err);
+      alert('이미지 생성에 실패했습니다.');
+      setIsSharing(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col flex-1 w-full max-w-md mx-auto relative antialiased" style={{ backgroundColor: '#F2F4F6', color: '#191F28' }}>
+
+      {/* 1. Main Screen */}
+      {pageState === 'main' && (
+        <div className="flex flex-col flex-1 p-5 animate-in fade-in duration-300">
+          <h1 className="text-2xl font-bold mb-2 text-[#191F28]">오늘의 갓생 생존 빙고 🔥</h1>
+          <p className="text-[15px] text-[#8B95A1] mb-8">소소한 미션으로 하루를 채워보세요</p>
+
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            {dailyMissions.map((mission, idx) => (
+              <div
+                key={idx}
+                onClick={() => toggleCell(idx)}
+                className={`
+                  relative flex flex-col items-center justify-center p-2 text-center
+                  rounded-2xl aspect-square shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer break-keep
+                  transition-all duration-200 select-none
+                  ${cellStates[idx] ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6]' : 'bg-white text-[#191F28] border-2 border-transparent'}
+                  active:scale-95
+                `}
+              >
+                <span className="text-2xl mb-1">{mission.icon}</span>
+                <span className="text-[13px] font-semibold leading-tight" dangerouslySetInnerHTML={{ __html: mission.text.replace(' ', '<br>') }} />
+
+                {/* Stamp logic */}
+                {cellStates[idx] && (
+                  <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">💮</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-auto pb-6 flex flex-col gap-3">
+            {!chanceUsed && cellStates.filter(Boolean).length < 9 && (
+              <button
+                onClick={handleChance}
+                className="w-full py-4 rounded-2xl font-semibold text-lg bg-[#FFF2F6] text-[#F04452] active:bg-[#FFE5EA] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="text-xl">✨</span> 무료 도장 1개 받기
+              </button>
+            )}
+            <button
+              onClick={handleCheckResult}
+              disabled={lines === 0}
+              className={`
+                w-full py-4 rounded-2xl font-semibold text-lg transition-all
+                ${lines > 0 ? 'bg-[#3182F6] text-white active:bg-[#1b64da]' : 'bg-[#E5E8EB] text-[#B0B8C1] cursor-not-allowed'}
+              `}
+            >
+              빙고 결과 확인하기
+            </button>
+            <div className="w-full h-[60px] bg-[#E5E8EB] flex items-center justify-center text-[#8B95A1] text-sm font-medium rounded-2xl mt-4">
+              <div className="absolute hidden">(AOS/iOS 배너 광고 ID 주입 위치)</div>
+              하단 배너 광고 영역
+            </div>
+
+            {/* Social Ranking Area */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h2 className="text-lg font-bold text-[#191F28] mb-4">🏆 내 친구 랭킹</h2>
+              <div className="space-y-3">
+                {friends.map((friend, idx) => (
+                  <div key={friend.id} className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-[#F2F4F6]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-[#E8F3FF] text-[#3182F6] rounded-full flex items-center justify-center font-bold">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#191F28]">{friend.name}</p>
+                        <p className="text-xs text-[#8B95A1]">{friend.lines}줄 달성</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handlePoke(friend.id, friend.name)}
+                      disabled={friend.poked}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${friend.poked ? 'bg-[#F2F4F6] text-[#8B95A1]' : 'bg-[#E8F3FF] text-[#3182F6] active:bg-[#D0E4FF]'}`}
+                    >
+                      {friend.poked ? '콕 찔렀어요' : '콕 찌르기'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Loading Screen (Interstitial Ad) */}
+      {pageState === 'loading' && (
+        <div className="flex flex-col flex-1 p-5 animate-in fade-in duration-300 pt-8">
+          <div className="w-full h-[250px] bg-[#E5E8EB] rounded-2xl flex items-center justify-center text-[#8B95A1] text-sm font-medium mb-8">
+            <div className="absolute hidden">(AOS/iOS 전면 광고 ID 주입 위치)</div>
+            전면 배너 광고 영역
+          </div>
+
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-4 border-[#E5E8EB] border-t-[#3182F6] rounded-full animate-spin mb-6"></div>
+            <p className="text-lg font-semibold text-[#191F28] text-center leading-relaxed">
+              무료 도장을<br />준비하고 있습니다...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Result / Share Screen */}
+      {pageState === 'result' && (
+        <div className="flex flex-col flex-1 p-5 animate-in fade-in duration-300 overflow-y-auto">
+          {/* Photocard UI */}
+          <div ref={resultCardRef} className="bg-gradient-to-br from-white to-[#f8f9fa] rounded-[24px] p-8 pb-10 shadow-[0_10px_30px_rgba(0,0,0,0.08)] flex flex-col items-center mb-6 border border-white/50">
+            <div className="text-5xl mb-3 animate-bounce-icon">{getRewardProps(lines).badge}</div>
+            <h1 className="text-center text-2xl font-bold mb-2">
+              <span className="text-[#3182F6] text-base font-semibold block mb-1">{lines}줄 빙고 완성</span>
+              {getRewardProps(lines).title} 🎉
+            </h1>
+            <p className="text-sm text-[#8B95A1] text-center mb-6 break-keep">
+              {getRewardProps(lines).desc}
+            </p>
+
+            <div className="bg-[#F2F4F6] p-4 rounded-2xl w-[220px]">
+              <div className="grid grid-cols-3 gap-2">
+                {cellStates.map((state, idx) => (
+                  <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${state ? 'bg-[#E8F3FF] border border-[#3182F6]' : 'bg-white'}`}>
+                    {state && <span className="text-2xl">💮</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto pb-6 flex flex-col gap-3">
+            <button
+              onClick={handleCaptureAndShare}
+              disabled={isSharing}
+              className={`w-full py-4 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${isSharing ? 'bg-[#E5E8EB] text-[#8B95A1]' : 'bg-[#FEE500] text-black active:scale-[0.98]'}`}
+            >
+              {isSharing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-[#8B95A1] border-t-transparent rounded-full animate-spin"></div>
+                  이미지 굽는 중...
+                </>
+              ) : (
+                "빙고 결과 이미지로 공유하기"
+              )}
+            </button>
+            <button
+              onClick={() => { setCellStates(new Array(9).fill(false)); setPageState('main'); }}
+              className="w-full py-4 rounded-2xl font-semibold text-lg bg-white text-[#191F28] active:scale-[0.98] transition-all border border-[#E5E8EB]"
+            >
+              내일 또 하러 오기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Animation Styles */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes stampAnim {
+          0% { opacity: 0; transform: scale(3) rotate(-15deg); }
+          50% { opacity: 1; transform: scale(0.9) rotate(5deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        .animate-bounce-stamp {
+          animation: stampAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes bounceIn {
+          0% { transform: scale(0); opacity: 0; }
+          60% { transform: scale(1.2); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-icon {
+          animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+      `}} />
+    </div>
+  );
+}
