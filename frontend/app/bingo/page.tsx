@@ -339,101 +339,80 @@ export default function BingoPage() {
               })}
             </div>
 
-            {/* Floating BINGO! Text Effect for each achieved combo */}
+            {/* Bingo Line Guides (Lines only, no text here) */}
             {achievedCombos.map((combo) => {
               const comboKey = combo.join(',');
-              const centerIdx = combo[1];
-              const row = Math.floor(centerIdx / 3);
-              const col = centerIdx % 3;
               const comboIndex = winningCombinations.indexOf(combo);
-
-              const isRow = [0, 1, 2].includes(comboIndex);
               const isCol = [3, 4, 5].includes(comboIndex);
               const isDiagonal1 = comboIndex === 6; // 0,4,8
               const isDiagonal2 = comboIndex === 7; // 2,4,6
+              const col = combo[1] % 3;
 
-              // Only apply pop-in animation for newly completed combos
-              const isNew = newlyAnimatedComboKeys.has(comboKey);
-
-              // --- Column (vertical) bingo: render with writing-mode ---
               if (isCol) {
                 return (
                   <div
-                    key={`bingo-text-${comboKey}`}
-                    className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-4xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text-vertical' : ''} flex items-center justify-center tracking-tight`}
+                    key={`line-col-${comboKey}`}
+                    className="absolute z-20 pointer-events-none bg-gradient-to-b from-transparent via-[#3182F6]/30 to-transparent"
                     style={{
-                      top: '50%',
                       left: `${col * 33.33 + 16.66}%`,
-                      transform: 'translate(-50%, -50%)',
-                      writingMode: 'vertical-rl',
-                      textOrientation: 'mixed',
-                      height: '95%',
-                      WebkitTextStroke: '2px white'
+                      top: '5%',
+                      width: '6px',
+                      height: '90%',
+                      transform: 'translateX(-50%)',
+                      borderRadius: '3px',
                     }}
-                  >
-                    BINGO!
-                  </div>
+                  />
                 );
               }
 
-              // --- Row (horizontal) bingo ---
-              if (isRow) {
-                return (
-                  <div
-                    key={`bingo-text-${comboKey}`}
-                    className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text' : ''} flex items-center justify-center whitespace-nowrap tracking-tighter`}
-                    style={{
-                      top: `${row * 33.33 + 16.66}%`,
-                      left: '50%',
-                      width: '100%',
-                      transform: 'translate(-50%, -50%) rotate(-5deg)',
-                      WebkitTextStroke: '2px white'
-                    }}
-                  >
-                    BINGO!
-                  </div>
-                );
-              }
-
-              // --- Diagonal bingo: line bar + centered text ---
               if (isDiagonal1 || isDiagonal2) {
                 const angle = isDiagonal1 ? 45 : -45;
                 return (
-                  <React.Fragment key={`bingo-diag-${comboKey}`}>
-                    {/* Diagonal line bar */}
-                    <div
-                      className="absolute z-20 pointer-events-none"
-                      style={{
-                        top: '50%',
-                        left: '50%',
-                        width: '141%',
-                        height: '8px',
-                        background: 'linear-gradient(90deg, transparent, rgba(49,130,246,0.5), rgba(49,130,246,0.7), rgba(49,130,246,0.5), transparent)',
-                        transform: `translate(-50%, -50%) rotate(${angle}deg)`,
-                        borderRadius: '4px',
-                      }}
-                    />
-                    {/* BINGO! text */}
-                    <div
-                      className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-4xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text-diagonal' : ''} flex items-center justify-center whitespace-nowrap tracking-tighter`}
-                      style={{
-                        top: '50%',
-                        left: '50%',
-                        transform: `translate(-50%, -50%) rotate(${angle}deg)`,
-                        WebkitTextStroke: '2px white',
-                        padding: '2px 12px',
-                        background: 'rgba(255,255,255,0.85)',
-                        borderRadius: '8px',
-                      }}
-                    >
-                      BINGO!
-                    </div>
-                  </React.Fragment>
+                  <div
+                    key={`line-diag-${comboKey}`}
+                    className="absolute z-20 pointer-events-none"
+                    style={{
+                      top: '50%',
+                      left: '50%',
+                      width: '141%',
+                      height: '6px',
+                      background: 'linear-gradient(90deg, transparent, rgba(49,130,246,0.3), rgba(49,130,246,0.5), rgba(49,130,246,0.3), transparent)',
+                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                      borderRadius: '3px',
+                    }}
+                  />
                 );
               }
-
               return null;
             })}
+
+            {/* Central Intensifying BINGO! Display */}
+            {lines > 0 && (
+              <div
+                key={`central-bingo-${lines}`}
+                className={`
+                  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                  z-40 pointer-events-none select-none font-black italic
+                  flex flex-col items-center justify-center
+                  animate-bingo-intensity-pop
+                `}
+              >
+                <div
+                  className={`
+                    text-6xl sm:text-7xl tracking-tighter drop-shadow-2xl
+                    ${lines >= 4 ? 'bingo-level-4' : lines >= 3 ? 'bingo-level-3' : lines >= 2 ? 'bingo-level-2' : 'bingo-level-1'}
+                  `}
+                  style={{ WebkitTextStroke: '2px white' }}
+                >
+                  BINGO!
+                </div>
+                {lines > 1 && (
+                  <div className="mt-[-8px] px-4 py-1 bg-white/90 rounded-full text-[#3182F6] font-bold text-sm shadow-lg border border-blue-100">
+                    {lines} LINES COMPLETE!
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="mt-auto pb-6 flex flex-col gap-3">
@@ -627,6 +606,48 @@ export default function BingoPage() {
         }
         .animate-bingo-text-diagonal {
           animation: bingoTextPopDiagonal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Bingo Intensity Levels */
+        .bingo-level-1 { color: #3182F6; }
+        .bingo-level-2 { 
+          color: #00D2FF; 
+          text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+          animation: bingo-pulse 1.5s ease-in-out infinite;
+        }
+        .bingo-level-3 { 
+          color: #FFD700; 
+          text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+          animation: bingo-glow 1s ease-in-out infinite alternate;
+        }
+        .bingo-level-4 { 
+          background: linear-gradient(to bottom, #FF4D00, #FFD700);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 15px rgba(255, 77, 0, 0.8));
+          animation: bingo-fire 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes bingo-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes bingo-glow {
+          from { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4)); }
+          to { filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9)); }
+        }
+        @keyframes bingo-fire {
+          from { transform: scale(1) rotate(-1deg); filter: drop-shadow(0 0 10px #FF4D00); }
+          to { transform: scale(1.02) rotate(1deg); filter: drop-shadow(0 0 20px #FFD700); }
+        }
+
+        @keyframes bingoIntensityPop {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          50% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .animate-bingo-intensity-pop {
+          animation: bingoIntensityPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       `}} />
     </div>
