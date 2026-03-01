@@ -89,9 +89,10 @@ export default function BingoPage() {
     { id: 'user_3', name: '박테크', lines: 0, poked: false },
   ]);
 
-  const lines = winningCombinations.filter(combo =>
+  const achievedCombos = winningCombinations.filter(combo =>
     cellStates[combo[0]] && cellStates[combo[1]] && cellStates[combo[2]]
-  ).length;
+  );
+  const lines = achievedCombos.length;
 
   const prevLinesRef = useRef(0);
   const resultCardRef = useRef<HTMLDivElement>(null);
@@ -198,13 +199,45 @@ export default function BingoPage() {
 
     setTimeout(() => {
       setPageState('result');
+      if (lines > 0) {
+        triggerConfetti();
+      }
     }, 3000);
+  };
+
+  const triggerConfetti = () => {
+    const duration = 2500;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#3182F6', '#F04452', '#00C853', '#FFC107'],
+        zIndex: 100
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#3182F6', '#F04452', '#00C853', '#FFC107'],
+        zIndex: 100
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
   };
 
   const getRewardProps = (lines: number) => {
     if (lines >= 5) return { badge: "👑", title: "루틴 마스터", desc: "당신의 갓생력은 상위 1% 타노스급입니다!" };
     if (lines >= 3) return { badge: "🔥", title: "열정 만수르", desc: "이 기세라면 올해 목표 달성은 시간문제!" };
-    if (lines >= 1) return { badge: "🐣", title: "새내기 갓생러", desc: "천리길도 한 걸음부터! 아주 훌륭한 시작이에요." };
+    if (lines >= 1) return { badge: "✨", title: "눈부신 성취", desc: "천리길도 한 걸음부터! 멋진 하루를 완성했어요." };
     return { badge: "🌱", title: "도전 시작", desc: "소소한 시작이 완벽한 하루를 만듭니다." };
   };
 
@@ -256,28 +289,60 @@ export default function BingoPage() {
           <h1 className="text-2xl font-bold mb-2 text-[#191F28]">오늘의 갓생 생존 빙고 🔥</h1>
           <p className="text-[15px] text-[#8B95A1] mb-8">당신의 꾸준함이 위대한 변화를 만듭니다</p>
 
-          <div className="grid grid-cols-3 gap-3 mb-8">
-            {dailyMissions.map((mission, idx) => (
-              <div
-                key={idx}
-                onClick={() => toggleCell(idx)}
-                className={`
-                  relative flex flex-col items-center justify-center p-2 text-center
-                  rounded-2xl aspect-square shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer break-keep
-                  transition-all duration-200 select-none
-                  ${cellStates[idx] ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6]' : 'bg-white text-[#191F28] border-2 border-transparent'}
-                  active:scale-95
-                `}
-              >
-                <span className="text-2xl mb-1">{mission.icon}</span>
-                <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
+          <div className="relative mb-8">
+            <div className="grid grid-cols-3 gap-3 relative z-10">
+              {dailyMissions.map((mission, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => toggleCell(idx)}
+                  className={`
+                    relative flex flex-col items-center justify-center p-2 text-center
+                    rounded-2xl aspect-square shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer break-keep
+                    transition-all duration-200 select-none
+                    ${cellStates[idx] ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6]' : 'bg-white text-[#191F28] border-2 border-transparent'}
+                    active:scale-95
+                  `}
+                >
+                  <span className="text-2xl mb-1">{mission.icon}</span>
+                  <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
 
-                {/* Stamp logic */}
-                {cellStates[idx] && (
-                  <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">⭕</div>
-                )}
-              </div>
-            ))}
+                  {/* Stamp logic */}
+                  {cellStates[idx] && (
+                    <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">⭕</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Winning Lines Overlay Effect */}
+            {achievedCombos.map((combo, i) => {
+              const isRow1 = combo[0] === 0 && combo[1] === 1;
+              const isRow2 = combo[0] === 3 && combo[1] === 4;
+              const isRow3 = combo[0] === 6 && combo[1] === 7;
+              const isCol1 = combo[0] === 0 && combo[1] === 3;
+              const isCol2 = combo[0] === 1 && combo[1] === 4;
+              const isCol3 = combo[0] === 2 && combo[1] === 5;
+              const isDiag1 = combo[0] === 0 && combo[1] === 4;
+              const isDiag2 = combo[0] === 2 && combo[1] === 4;
+
+              let style: React.CSSProperties = {};
+              if (isRow1) style = { top: '16.66%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
+              if (isRow2) style = { top: '50%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
+              if (isRow3) style = { top: '83.33%', left: '2%', width: '96%', height: '10px', transform: 'translateY(-50%)' };
+              if (isCol1) style = { left: '16.66%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
+              if (isCol2) style = { left: '50%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
+              if (isCol3) style = { left: '83.33%', top: '2%', height: '96%', width: '10px', transform: 'translateX(-50%)' };
+              if (isDiag1) style = { top: '50%', left: '50%', width: '115%', height: '10px', transform: 'translate(-50%, -50%) rotate(45deg)' };
+              if (isDiag2) style = { top: '50%', left: '50%', width: '115%', height: '10px', transform: 'translate(-50%, -50%) rotate(-45deg)' };
+
+              return (
+                <div
+                  key={i}
+                  className="absolute bg-[#F04452]/90 rounded-full z-20 pointer-events-none shadow-[0_2px_8px_rgba(240,68,82,0.5)] animate-in zoom-in fade-in duration-300"
+                  style={style}
+                />
+              );
+            })}
           </div>
 
           <div className="mt-auto pb-6 flex flex-col gap-3">
@@ -355,17 +420,31 @@ export default function BingoPage() {
       {pageState === 'result' && (
         <div className="flex flex-col flex-1 p-5 animate-in fade-in duration-300 overflow-y-auto">
           {/* Photocard UI */}
-          <div ref={resultCardRef} className="bg-gradient-to-br from-white to-[#f8f9fa] rounded-[24px] p-8 pb-10 shadow-[0_10px_30px_rgba(0,0,0,0.08)] flex flex-col items-center mb-6 border border-white/50">
-            <div className="text-5xl mb-3 animate-bounce-icon">{getRewardProps(lines).badge}</div>
-            <h1 className="text-center text-2xl font-bold mb-2">
-              <span className="text-[#3182F6] text-base font-semibold block mb-1">{lines}줄 빙고 완성</span>
-              {getRewardProps(lines).title} 🎉
+          <div ref={resultCardRef} className="bg-gradient-to-br from-[#FFFFFF] to-[#F8F9FA] rounded-[24px] p-8 pb-10 shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex flex-col items-center mb-6 border border-white/80 relative overflow-hidden">
+            {/* 띠지 효과 데코레이션 */}
+            {lines > 0 && (
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3182F6]/20 to-transparent -rotate-45 -translate-y-16 translate-x-16 pointer-events-none"></div>
+            )}
+
+            <div className="text-6xl mb-4 animate-bounce-icon filter drop-shadow-sm z-10">{getRewardProps(lines).badge}</div>
+            <h1 className="text-center text-[26px] font-extrabold mb-3 tracking-tight text-[#191F28] z-10 break-keep">
+              {lines > 0 ? (
+                <>
+                  <span className="text-[#3182F6] text-[17px] font-bold block mb-1.5 tracking-normal">{lines}줄 빙고 완성</span>
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#191F28] to-[#4E5968]">{getRewardProps(lines).title}</span> 🎉
+                </>
+              ) : (
+                <>
+                  <span className="text-[#8B95A1] text-[17px] font-bold block mb-1.5 tracking-normal">내일은 더 잘할 수 있어요</span>
+                  <span className="text-[#4E5968]">{getRewardProps(lines).title}</span> 🌱
+                </>
+              )}
             </h1>
-            <p className="text-sm text-[#8B95A1] text-center mb-6 break-keep">
+            <p className="text-[15px] font-medium text-[#505967] text-center mb-8 break-keep leading-relaxed z-10 px-2">
               {getRewardProps(lines).desc}
             </p>
 
-            <div className="bg-[#F2F4F6] p-4 rounded-2xl w-[220px]">
+            <div className="bg-[#F2F4F6] p-4 rounded-2xl w-[220px] shadow-inner z-10 border border-gray-100">
               <div className="grid grid-cols-3 gap-2">
                 {cellStates.map((state, idx) => (
                   <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${state ? 'bg-[#E8F3FF] border border-[#3182F6]' : 'bg-white'}`}>
