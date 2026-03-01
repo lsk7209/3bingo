@@ -352,6 +352,31 @@ export default function BingoPage() {
               const isDiagonal1 = comboIndex === 6; // 0,4,8
               const isDiagonal2 = comboIndex === 7; // 2,4,6
 
+              // Only apply pop-in animation for newly completed combos
+              const isNew = newlyAnimatedComboKeys.has(comboKey);
+
+              // --- Column (vertical) bingo: render with writing-mode ---
+              if (isCol) {
+                return (
+                  <div
+                    key={`bingo-text-${comboKey}`}
+                    className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-4xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text-vertical' : ''} flex items-center justify-center tracking-tight`}
+                    style={{
+                      top: '50%',
+                      left: `${col * 33.33 + 16.66}%`,
+                      transform: 'translate(-50%, -50%)',
+                      writingMode: 'vertical-rl',
+                      textOrientation: 'mixed',
+                      height: '95%',
+                      WebkitTextStroke: '2px white'
+                    }}
+                  >
+                    BINGO!
+                  </div>
+                );
+              }
+
+              // --- Horizontal / Diagonal bingo ---
               let animationStyle: React.CSSProperties = {
                 top: `${row * 33.33 + 16.66}%`,
                 left: `${col * 33.33 + 16.66}%`,
@@ -359,16 +384,13 @@ export default function BingoPage() {
 
               if (isRow) {
                 animationStyle = { top: `${row * 33.33 + 16.66}%`, left: '50%', width: '100%' };
-              } else if (isCol) {
-                animationStyle = { top: '50%', left: `${col * 33.33 + 16.66}%`, transform: 'translate(-50%, -50%) rotate(90deg)', width: '100%', height: '33%' };
               } else if (isDiagonal1) {
-                animationStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(40deg)', width: '140%' };
+                animationStyle = { top: '50%', left: '50%', width: '140%' };
               } else if (isDiagonal2) {
-                animationStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-40deg)', width: '140%' };
+                animationStyle = { top: '50%', left: '50%', width: '140%' };
               }
 
-              // Only apply pop-in animation for newly completed combos
-              const isNew = newlyAnimatedComboKeys.has(comboKey);
+              const diagonalRotate = isDiagonal1 ? 'rotate(40deg)' : isDiagonal2 ? 'rotate(-40deg)' : 'rotate(-5deg)';
 
               return (
                 <div
@@ -376,7 +398,7 @@ export default function BingoPage() {
                   className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text' : ''} flex items-center justify-center whitespace-nowrap tracking-tighter`}
                   style={{
                     ...animationStyle,
-                    transform: animationStyle.transform || 'translate(-50%, -50%) rotate(-5deg)',
+                    transform: `translate(-50%, -50%) ${diagonalRotate}`,
                     WebkitTextStroke: '2px white'
                   }}
                 >
@@ -559,6 +581,15 @@ export default function BingoPage() {
         }
         .animate-bingo-text {
           animation: bingoTextPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes bingoTextPopVertical {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+          50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+          70% { transform: translate(-50%, -50%) scale(0.95); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .animate-bingo-text-vertical {
+          animation: bingoTextPopVertical 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       `}} />
     </div>
