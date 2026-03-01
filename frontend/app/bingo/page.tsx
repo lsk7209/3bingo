@@ -323,6 +323,29 @@ export default function BingoPage() {
                 )
               })}
             </div>
+
+            {/* Floating BINGO! Text Effect for each achieved combo */}
+            {achievedCombos.map((combo, i) => {
+              const centerIdx = combo[1];
+              const row = Math.floor(centerIdx / 3);
+              const col = centerIdx % 3;
+              const isDiagonal = (combo[0] === 0 && combo[2] === 8) || (combo[0] === 2 && combo[2] === 6);
+
+              return (
+                <div
+                  key={`bingo-text-${i}`}
+                  className="absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-3xl drop-shadow-[0_4px_8px_rgba(49,130,246,0.5)] animate-bingo-text"
+                  style={{
+                    top: isDiagonal ? '50%' : `${row * 33.33 + 16.66}%`,
+                    left: isDiagonal ? '50%' : `${col * 33.33 + 16.66}%`,
+                    transform: 'translate(-50%, -50%) rotate(-10deg)',
+                    WebkitTextStroke: '1.5px white'
+                  }}
+                >
+                  BINGO!
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-auto pb-6 flex flex-col gap-3">
@@ -496,6 +519,15 @@ export default function BingoPage() {
         }
         .animate-winner-pulse {
           animation: winnerPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes bingoTextPop {
+          0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); opacity: 0; }
+          50% { transform: translate(-50%, -50%) scale(1.4) rotate(10deg); opacity: 1; }
+          70% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); opacity: 1; }
+          100% { transform: translate(-50%, -50%) scale(1) rotate(-10deg); opacity: 1; }
+        }
+        .animate-bingo-text {
+          animation: bingoTextPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
       `}} />
     </div>
