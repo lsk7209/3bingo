@@ -97,17 +97,39 @@ export default function BingoPage() {
 
   const prevLinesRef = useRef(0);
   const resultCardRef = useRef<HTMLDivElement>(null);
+  // Track which combos are 'new' (should play animation) vs 'old' (should be static)
+  const prevAchievedComboKeysRef = useRef<Set<string>>(new Set());
+  const [newlyAnimatedComboKeys, setNewlyAnimatedComboKeys] = useState<Set<string>>(new Set());
+
   useEffect(() => {
-    if (lines > prevLinesRef.current) {
+    const currentKeys = new Set(achievedCombos.map(c => c.join(',')));
+    const brandNewKeys = new Set<string>();
+    currentKeys.forEach(key => {
+      if (!prevAchievedComboKeysRef.current.has(key)) {
+        brandNewKeys.add(key);
+      }
+    });
+
+    if (brandNewKeys.size > 0) {
+      // Play confetti only for new combos
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
         zIndex: 100
       });
+      setNewlyAnimatedComboKeys(brandNewKeys);
+      // After animation duration, clear the 'new' set so they become static
+      const timer = setTimeout(() => {
+        setNewlyAnimatedComboKeys(new Set());
+      }, 1000);
+      prevAchievedComboKeysRef.current = currentKeys;
+      prevLinesRef.current = lines;
+      return () => clearTimeout(timer);
     }
+    prevAchievedComboKeysRef.current = currentKeys;
     prevLinesRef.current = lines;
-  }, [lines]);
+  }, [lines, achievedCombos]);
 
   const toggleCell = (index: number) => {
     setCellStates(prev => {
@@ -318,15 +340,17 @@ export default function BingoPage() {
             </div>
 
             {/* Floating BINGO! Text Effect for each achieved combo */}
-            {achievedCombos.map((combo, i) => {
+            {achievedCombos.map((combo) => {
+              const comboKey = combo.join(',');
               const centerIdx = combo[1];
               const row = Math.floor(centerIdx / 3);
               const col = centerIdx % 3;
+              const comboIndex = winningCombinations.indexOf(combo);
 
-              const isRow = [0, 1, 2].includes(winningCombinations.indexOf(combo));
-              const isCol = [3, 4, 5].includes(winningCombinations.indexOf(combo));
-              const isDiagonal1 = winningCombinations.indexOf(combo) === 6; // 0,4,8
-              const isDiagonal2 = winningCombinations.indexOf(combo) === 7; // 2,4,6
+              const isRow = [0, 1, 2].includes(comboIndex);
+              const isCol = [3, 4, 5].includes(comboIndex);
+              const isDiagonal1 = comboIndex === 6; // 0,4,8
+              const isDiagonal2 = comboIndex === 7; // 2,4,6
 
               let animationStyle: React.CSSProperties = {
                 top: `${row * 33.33 + 16.66}%`,
@@ -343,10 +367,13 @@ export default function BingoPage() {
                 animationStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-40deg)', width: '140%' };
               }
 
+              // Only apply pop-in animation for newly completed combos
+              const isNew = newlyAnimatedComboKeys.has(comboKey);
+
               return (
                 <div
-                  key={`bingo-text-${i}`}
-                  className="absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] animate-bingo-text flex items-center justify-center whitespace-nowrap tracking-tighter"
+                  key={`bingo-text-${comboKey}`}
+                  className={`absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] ${isNew ? 'animate-bingo-text' : ''} flex items-center justify-center whitespace-nowrap tracking-tighter`}
                   style={{
                     ...animationStyle,
                     transform: animationStyle.transform || 'translate(-50%, -50%) rotate(-5deg)',
