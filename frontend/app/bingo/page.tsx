@@ -303,7 +303,7 @@ export default function BingoPage() {
                     rounded-2xl aspect-square cursor-pointer break-keep
                     transition-all duration-300 select-none
                     ${isWinning
-                        ? 'bg-[#F0F6FF] text-[#3182F6] border-2 border-[#3182F6] shadow-[0_4px_16px_rgba(49,130,246,0.3)] animate-winner-pulse z-10'
+                        ? 'bg-[#B2D1FF] text-[#0059E3] border-[3px] border-[#3182F6] shadow-[0_8px_24px_rgba(49,130,246,0.4)] animate-winner-pulse z-10'
                         : cellStates[idx]
                           ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
                           : 'bg-white text-[#191F28] border-2 border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)]'}
@@ -329,17 +329,35 @@ export default function BingoPage() {
               const centerIdx = combo[1];
               const row = Math.floor(centerIdx / 3);
               const col = centerIdx % 3;
-              const isDiagonal = (combo[0] === 0 && combo[2] === 8) || (combo[0] === 2 && combo[2] === 6);
+
+              const isRow = [0, 1, 2].includes(winningCombinations.indexOf(combo));
+              const isCol = [3, 4, 5].includes(winningCombinations.indexOf(combo));
+              const isDiagonal1 = winningCombinations.indexOf(combo) === 6; // 0,4,8
+              const isDiagonal2 = winningCombinations.indexOf(combo) === 7; // 2,4,6
+
+              let animationStyle: React.CSSProperties = {
+                top: `${row * 33.33 + 16.66}%`,
+                left: `${col * 33.33 + 16.66}%`,
+              };
+
+              if (isRow) {
+                animationStyle = { top: `${row * 33.33 + 16.66}%`, left: '50%', width: '100%' };
+              } else if (isCol) {
+                animationStyle = { top: '50%', left: `${col * 33.33 + 16.66}%`, transform: 'translate(-50%, -50%) rotate(90deg)', width: '100%', height: '33%' };
+              } else if (isDiagonal1) {
+                animationStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(40deg)', width: '140%' };
+              } else if (isDiagonal2) {
+                animationStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-40deg)', width: '140%' };
+              }
 
               return (
                 <div
                   key={`bingo-text-${i}`}
-                  className="absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-3xl drop-shadow-[0_4px_8px_rgba(49,130,246,0.5)] animate-bingo-text"
+                  className="absolute z-30 pointer-events-none select-none font-black italic text-[#3182F6] text-5xl sm:text-6xl drop-shadow-[0_4px_12px_rgba(49,130,246,0.6)] animate-bingo-text flex items-center justify-center whitespace-nowrap tracking-tighter"
                   style={{
-                    top: isDiagonal ? '50%' : `${row * 33.33 + 16.66}%`,
-                    left: isDiagonal ? '50%' : `${col * 33.33 + 16.66}%`,
-                    transform: 'translate(-50%, -50%) rotate(-10deg)',
-                    WebkitTextStroke: '1.5px white'
+                    ...animationStyle,
+                    transform: animationStyle.transform || 'translate(-50%, -50%) rotate(-5deg)',
+                    WebkitTextStroke: '2px white'
                   }}
                 >
                   BINGO!
