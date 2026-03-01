@@ -7,8 +7,20 @@
  */
 
 // 설정 페이지 (TDS Menu/Group UI)
+type MenuItem = {
+    label: string;
+    value?: string;
+    hasToggle?: boolean;
+    hasArrow?: boolean;
+};
+
+type MenuGroup = {
+    title: string;
+    items: MenuItem[];
+};
+
 export default function SettingsPage() {
-    const menuGroups = [
+    const menuGroups: MenuGroup[] = [
         {
             title: '게임 설정',
             items: [
