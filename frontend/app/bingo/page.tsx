@@ -6,26 +6,31 @@ import confetti from 'canvas-confetti';
 import { toCanvas } from 'html-to-image';
 
 const missionPool = [
-  { icon: "💧", text: "물 3잔 마시기" },
-  { icon: "🚶", text: "10분 걷기" },
-  { icon: "🥤", text: "텀블러 쓰기" },
-  { icon: "🧘‍♀️", text: "스트레칭 하기" },
-  { icon: "💰", text: "무지출 챌린지" },
-  { icon: "💬", text: "칭찬 한마디" },
-  { icon: "☁️", text: "하늘 쳐다보기" },
-  { icon: "🍩", text: "야식 참기" },
-  { icon: "🏃‍♂️", text: "계단 이용하기" },
-  { icon: "📚", text: "책 10페이지 읽기" },
-  { icon: "🍎", text: "건강한 간식 먹기" },
-  { icon: "🛌", text: "일찍 잠자리에 들기" },
-  { icon: "🧼", text: "10분 청소하기" },
-  { icon: "📝", text: "감사일기 쓰기" },
-  { icon: "🌞", text: "아침 기지개 켜기" },
-  { icon: "📵", text: "디지털 디톡스 30분" },
-  { icon: "💪", text: "스쿼트 30개 하기" },
-  { icon: "🥦", text: "채소 챙겨먹기" },
-  { icon: "🎵", text: "명상 음악 듣기" },
-  { icon: "🌱", text: "식물/반려동물 돌보기" }
+  { icon: "💧", text: "물 3컵 마시기" },
+  { icon: "🚶", text: "동네 한 바퀴 산책" },
+  { icon: "🥤", text: "카페에서 텀블러 사용" },
+  { icon: "🧘‍♀️", text: "찌릿찌릿! 스트레칭" },
+  { icon: "💰", text: "오늘 하루 무지출" },
+  { icon: "💬", text: "따뜻한 칭찬 한마디" },
+  { icon: "☁️", text: "멍하니 하늘 보기" },
+  { icon: "🍩", text: "밤 10시 이후 야식금지" },
+  { icon: "🏃‍♂️", text: "엘베 대신 계단 이용" },
+  { icon: "📚", text: "독서 10페이지" },
+  { icon: "🍎", text: "설탕 대신 과일 먹기" },
+  { icon: "🛌", text: "자정 전에 잠들기" },
+  { icon: "🧼", text: "내 방 10분 청소" },
+  { icon: "📝", text: "오늘의 감사 일기" },
+  { icon: "🌞", text: "아침 기지개 쭉쭉!" },
+  { icon: "📵", text: "스마트폰 잠시 안녕" },
+  { icon: "💪", text: "스쿼트 30개 도전" },
+  { icon: "🥦", text: "신선한 채소 먹기" },
+  { icon: "🎵", text: "마음 편한 명상 음악" },
+  { icon: "🌱", text: "반려동물/식물 돌보기" },
+  { icon: "🧹", text: "책상 위 1분 정리" },
+  { icon: "🥗", text: "건강한 한 끼 식사" },
+  { icon: "💡", text: "내일의 할 일 3가지" },
+  { icon: "🧼", text: "손 뽀득뽀득 씻기" },
+  { icon: "🪞", text: "거울 보고 활짝 웃기" }
 ];
 
 const winningCombinations = [
@@ -265,7 +270,7 @@ export default function BingoPage() {
                 `}
               >
                 <span className="text-2xl mb-1">{mission.icon}</span>
-                <span className="text-[13px] font-semibold leading-tight" dangerouslySetInnerHTML={{ __html: mission.text.replace(' ', '<br>') }} />
+                <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
 
                 {/* Stamp logic */}
                 {cellStates[idx] && (
@@ -340,7 +345,7 @@ export default function BingoPage() {
           <div className="flex-1 flex flex-col items-center justify-center">
             <div className="w-12 h-12 border-4 border-[#E5E8EB] border-t-[#3182F6] rounded-full animate-spin mb-6"></div>
             <p className="text-lg font-semibold text-[#191F28] text-center leading-relaxed">
-              무료 도장을<br />준비하고 있습니다...
+              오늘의 도장을<br />가져오고 있어요
             </p>
           </div>
         </div>
