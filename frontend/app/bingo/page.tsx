@@ -429,9 +429,14 @@ export default function BingoPage() {
                 {cellStates.map((state, idx) => {
                   const isWinning = winningCellIndices.has(idx);
                   return (
-                    <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${isWinning ? 'bg-[#F0F6FF] border border-[#3182F6]' : state ? 'bg-[#E8F3FF] border border-[#3182F6]/50' : 'bg-white'}`}>
+                    <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center relative ${isWinning ? 'bg-[#F0F6FF] border border-[#3182F6]' : state ? 'bg-[#E8F3FF] border border-[#3182F6]/50' : 'bg-white'}`}>
                       {state && (
-                        <div className={`w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] ${isWinning ? 'opacity-100' : 'opacity-60'}`}></div>
+                        <div className={`w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] flex items-center justify-center ${isWinning ? 'opacity-100 bg-[#3182F6]/10' : 'opacity-70'}`}>
+                          <span className="text-[18px]">{dailyMissions[idx].icon}</span>
+                        </div>
+                      )}
+                      {!state && (
+                        <span className="text-[18px] opacity-20 grayscale">{dailyMissions[idx].icon}</span>
                       )}
                     </div>
                   )
