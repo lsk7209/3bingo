@@ -303,22 +303,15 @@ export default function BingoPage() {
                     rounded-2xl aspect-square cursor-pointer break-keep
                     transition-all duration-300 select-none
                     ${isWinning
-                        ? 'bg-[#B2D1FF] text-[#0059E3] border-[3px] border-[#3182F6] shadow-[0_8px_24px_rgba(49,130,246,0.4)] animate-winner-pulse z-10'
+                        ? 'bg-[#B2D1FF] text-[#0059E3] border-[6px] border-[#3182F6] shadow-[0_8px_24px_rgba(49,130,246,0.4)] animate-winner-pulse z-10'
                         : cellStates[idx]
-                          ? 'bg-[#E8F3FF] text-[#3182F6] border-2 border-[#3182F6] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+                          ? 'bg-[#E8F3FF] text-[#3182F6] border-[6px] border-[#3182F6] shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
                           : 'bg-white text-[#191F28] border-2 border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.04)]'}
                     active:scale-95
                   `}
                   >
                     <span className="text-2xl mb-1">{mission.icon}</span>
                     <span className="text-[13px] font-semibold leading-tight break-keep">{mission.text}</span>
-
-                    {/* Stamp logic */}
-                    {cellStates[idx] && (
-                      <div className="absolute inset-0 flex items-center justify-center animate-bounce-stamp pointer-events-none">
-                        <div className={`w-[85%] h-[85%] rounded-[20px] border-[5px] ${isWinning ? 'border-[#3182F6] shadow-[0_0_20px_rgba(49,130,246,0.6)]' : 'border-[#3182F6] shadow-[0_0_15px_rgba(49,130,246,0.4)]'} opacity-80 mix-blend-multiply transition-all duration-300`}></div>
-                      </div>
-                    )}
                   </div>
                 )
               })}
@@ -470,15 +463,8 @@ export default function BingoPage() {
                 {cellStates.map((state, idx) => {
                   const isWinning = winningCellIndices.has(idx);
                   return (
-                    <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center relative ${isWinning ? 'bg-[#F0F6FF] border border-[#3182F6]' : state ? 'bg-[#E8F3FF] border border-[#3182F6]/50' : 'bg-white'}`}>
-                      {state && (
-                        <div className={`w-[70%] h-[70%] rounded-[8px] border-[3px] border-[#3182F6] flex items-center justify-center ${isWinning ? 'opacity-100 bg-[#3182F6]/10' : 'opacity-70'}`}>
-                          <span className="text-[18px]">{dailyMissions[idx].icon}</span>
-                        </div>
-                      )}
-                      {!state && (
-                        <span className="text-[18px] opacity-20 grayscale">{dailyMissions[idx].icon}</span>
-                      )}
+                    <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center relative ${isWinning ? 'bg-[#F0F6FF] border-[3px] border-[#3182F6]' : state ? 'bg-[#E8F3FF] border-[3px] border-[#3182F6]/50' : 'bg-white'}`}>
+                      <span className={`text-[18px] ${state ? 'opacity-100' : 'opacity-20 grayscale'}`}>{dailyMissions[idx].icon}</span>
                     </div>
                   )
                 })}
