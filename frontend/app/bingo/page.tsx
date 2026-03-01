@@ -254,7 +254,7 @@ export default function BingoPage() {
       {pageState === 'main' && (
         <div className="flex flex-col flex-1 p-5 animate-in fade-in duration-300">
           <h1 className="text-2xl font-bold mb-2 text-[#191F28]">오늘의 갓생 생존 빙고 🔥</h1>
-          <p className="text-[15px] text-[#8B95A1] mb-8">소소한 미션으로 하루를 채워보세요</p>
+          <p className="text-[15px] text-[#8B95A1] mb-8">당신의 꾸준함이 위대한 변화를 만듭니다</p>
 
           <div className="grid grid-cols-3 gap-3 mb-8">
             {dailyMissions.map((mission, idx) => (
@@ -345,7 +345,7 @@ export default function BingoPage() {
           <div className="flex-1 flex flex-col items-center justify-center">
             <div className="w-12 h-12 border-4 border-[#E5E8EB] border-t-[#3182F6] rounded-full animate-spin mb-6"></div>
             <p className="text-lg font-semibold text-[#191F28] text-center leading-relaxed">
-              오늘의 도장을<br />가져오고 있어요
+              오늘의 갓생 리포트를<br />만들고 있어요
             </p>
           </div>
         </div>
@@ -385,7 +385,7 @@ export default function BingoPage() {
               {isSharing ? (
                 <>
                   <div className="w-5 h-5 border-2 border-[#8B95A1] border-t-transparent rounded-full animate-spin"></div>
-                  이미지 굽는 중...
+                  공유 이미지를 만들고 있어요...
                 </>
               ) : (
                 "빙고 결과 이미지로 공유하기"

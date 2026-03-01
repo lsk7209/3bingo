@@ -9,12 +9,12 @@ export default function Home() {
       {/* 🚀 Hero Section */}
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: '#191F28' }}>
-          퍼즐 게임<br />
-          <span style={{ color: '#3182F6' }}>토스 환경 테스트</span>
+          매일 더 빛나는 나,<br />
+          <span style={{ color: '#3182F6' }}>오늘의 갓생 빙고</span>
         </h2>
         <p className="text-[15px] leading-relaxed break-keep px-2" style={{ color: '#8B95A1' }}>
-          토스 미니앱 연동 보일러플레이트입니다.<br />
-          타사 로그인을 배제하고 오직 토스 전용 UI를 제공합니다.
+          작은 습관이 모여 만드는 완벽한 하루.<br />
+          오늘의 미션을 완수하고 갓생력을 확인해 보세요.
         </p>
       </div>
 
@@ -29,7 +29,7 @@ export default function Home() {
         <TossLoginButton />
         <div className="mt-4 pt-4 border-t border-gray-200">
           <a href="/bingo" className="block w-full py-4 text-center rounded-xl font-semibold bg-[#F2F4F6] text-[#191F28] hover:bg-[#E5E8EB] transition-colors">
-            갓생 빙고 미니앱 (BETA) 입장
+            지금 바로 시작하기
           </a>
         </div>
       </div>

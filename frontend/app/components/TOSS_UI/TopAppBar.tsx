@@ -16,7 +16,7 @@ interface TopAppBarProps {
 // - 배경: rgba(white, 0.9) + backdrop-blur (토스 앱과 동일한 frost glass 처리)
 // - 타이틀: text-[17px] font-semibold, color: #191F28
 export default function TopAppBar({
-    title = '토스 미니앱 퍼즐',
+    title = '오늘의 갓생 빙고',
     rightAction,
     showBack = true,
 }: TopAppBarProps) {

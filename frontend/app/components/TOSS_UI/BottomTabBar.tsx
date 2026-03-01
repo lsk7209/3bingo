@@ -51,7 +51,7 @@ const IconSettings = ({ active }: { active: boolean }) => (
 
 const tabs = [
     { name: '홈', path: '/', Icon: IconHome },
-    { name: '퍼즐', path: '/puzzle', Icon: IconPuzzle },
+    { name: '빙고', path: '/bingo', Icon: IconPuzzle },
     { name: '기록', path: '/history', Icon: IconHistory },
     { name: '설정', path: '/settings', Icon: IconSettings },
 ];
