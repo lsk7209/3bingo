@@ -274,7 +274,7 @@ export default function BingoPage() {
 
                 {/* Stamp logic */}
                 {cellStates[idx] && (
-                  <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">💮</div>
+                  <div className="absolute text-5xl animate-bounce-stamp pointer-events-none opacity-90 drop-shadow-md">⭕</div>
                 )}
               </div>
             ))}
@@ -369,7 +369,7 @@ export default function BingoPage() {
               <div className="grid grid-cols-3 gap-2">
                 {cellStates.map((state, idx) => (
                   <div key={idx} className={`aspect-square rounded-lg flex items-center justify-center text-xs relative ${state ? 'bg-[#E8F3FF] border border-[#3182F6]' : 'bg-white'}`}>
-                    {state && <span className="text-2xl">💮</span>}
+                    {state && <span className="text-2xl">⭕</span>}
                   </div>
                 ))}
               </div>
